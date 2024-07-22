@@ -48,7 +48,7 @@ m_values = []
 h_values = []
 n_values = []
 
-# Simulation
+# Simulation im Euler Verfahren
 for t in time:
     # Ströme
     I_Na = g_Na * (m ** 3) * h * (V - V_Na)
