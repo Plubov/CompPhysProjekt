@@ -1,82 +1,114 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-# Definiere die Aktivierungsfunktion und ihre Ableitung
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+# Parameter
+Cm = 1.0  # Membrankapazität in uF/cm^2
+gK = 36.0  # Maximale Leitfähigkeit für Kalium in mS/cm^2
+gNa = 120.0  # Maximale Leitfähigkeit für Natrium in mS/cm^2
+gL = 0.3  # Maximale Leitfähigkeit für Leckstrom in mS/cm^2
+EK = -77.0  # Umkehrpotential für Kalium in mV
+ENa = 50.0  # Umkehrpotential für Natrium in mV
+EL = -54.387  # Umkehrpotential für Leckstrom in mV
+I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
 
-def sigmoid_derivative(x):
-    return sigmoid(x) * (1 - sigmoid(x))
+# Zeitparameter
+dt = 0.01  # Zeitschritt in ms
+t_max = 50.0  # Maximale Zeit in ms
+t = np.linspace(0, t_max, int(t_max / dt))  # Zeitvektor
 
-# Definiere die neuronalen Netze mit 5 Neuronen im versteckten Layer
-class NeuralNetwork:
-    def __init__(self, input_size, hidden_size, output_size, I0):
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.I0 = I0
 
-        # Gewichte initialisieren
-        self.W1 = np.random.randn(self.input_size, self.hidden_size)
-        self.W2 = np.random.randn(self.hidden_size, self.output_size)
+# Funktionen für alpha und beta
+def alpha_n(V):
+    return 0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))
 
-        # Biases initialisieren
-        self.b1 = np.random.randn(self.hidden_size)
-        self.b2 = np.random.randn(self.output_size)
 
-    def forward(self, X):
-        self.Z1 = np.dot(X, self.W1) + self.b1
-        self.A1 = sigmoid(self.Z1)
-        self.A1 = np.maximum(self.A1, self.I0)  # Minimum Stromstärke I0
-        self.Z2 = np.dot(self.A1, self.W2) + self.b2
-        self.A2 = sigmoid(self.Z2)
-        return self.A2
+def beta_n(V):
+    return 0.125 * np.exp(-(V + 65) / 80)
 
-    def train(self, X, y, learning_rate=0.1, epochs=10000):
-        for epoch in range(epochs):
-            # Vorwärtspropagation
-            output = self.forward(X)
 
-            # Berechne Fehler
-            error = y - output
+def alpha_m(V):
+    return 0.1 * (V + 40) / (1 - np.exp(-(V + 40) / 10))
 
-            # Rückwärtspropagation
-            dZ2 = error * sigmoid_derivative(self.Z2)
-            dW2 = np.dot(self.A1.T, dZ2)
-            db2 = np.sum(dZ2, axis=0)
 
-            dA1 = np.dot(dZ2, self.W2.T)
-            dA1 = np.maximum(dA1, self.I0)  # Minimum Stromstärke I0
-            dZ1 = dA1 * sigmoid_derivative(self.Z1)
-            dW1 = np.dot(X.T, dZ1)
-            db1 = np.sum(dZ1, axis=0)
+def beta_m(V):
+    return 4.0 * np.exp(-(V + 65) / 18)
 
-            # Aktualisiere Gewichte und Biases
-            self.W1 += learning_rate * dW1
-            self.b1 += learning_rate * db1
-            self.W2 += learning_rate * dW2
-            self.b2 += learning_rate * db2
 
-# Definiere das 2x2-Schachbrettmuster
-X = np.array([
-    [0, 1, 1, 0],
-    [0, 1, 0, 1],
-    [1, 0, 0, 1],
-    [1, 0, 1, 0]
-])
+def alpha_h(V):
+    return 0.07 * np.exp(-(V + 65) / 20)
 
-y = np.array([
-    [1],
-    [0],
-    [1],
-    [0]
-])
 
-# Initialisiere und trainiere das neuronale Netzwerk
-I0 = 0.01
-nn = NeuralNetwork(input_size=4, hidden_size=5, output_size=1, I0=I0)
-nn.train(X, y)
+def beta_h(V):
+    return 1 / (1 + np.exp(-(V + 35) / 10))
 
-# Teste das Netzwerk
-for pattern in X:
-    print(f"Input: {pattern} -> Output: {nn.forward(pattern)}")
+
+# Differentialgleichungssystem
+def hodgkin_huxley(y, t, I0):
+    V, n, m, h = y
+    I_Na = gNa * m ** 3 * h * (V - ENa)
+    I_K = gK * n ** 4 * (V - EK)
+    I_L = gL * (V - EL)
+
+    dVdt = (I0 - I_Na - I_K - I_L) / Cm
+    dndt = alpha_n(V) * (1 - n) - beta_n(V) * n
+    dmdt = alpha_m(V) * (1 - m) - beta_m(V) * m
+    dhdt = alpha_h(V) * (1 - h) - beta_h(V) * h
+
+    return [dVdt, dndt, dmdt, dhdt]
+
+
+# Anfangsbedingungen
+V0 = -65.0  # Initiales Membranpotential in mV
+n0 = 0.3177  # Initialer Wert von n
+m0 = 0.0529  # Initialer Wert von m
+h0 = 0.5961  # Initialer Wert von h
+y0 = [V0, n0, m0, h0]
+
+# Lösung des Systems
+solution = odeint(hodgkin_huxley, y0, t, args=(I0,))
+
+# Ergebnisse extrahieren
+V_values = solution[:, 0]
+n_values = solution[:, 1]
+m_values = solution[:, 2]
+h_values = solution[:, 3]
+
+#Definieren der Klasse Neuron mit sämtlichen für das neuronale Netzwerk relevanten Funktionen
+class Neuron:
+    I_in=0 #Input Spannung
+    V=-5
+    m=0
+    n=0
+    h=0
+    def __init__(self,V,n,m,h):
+        self.V=V
+        self.n=n
+        self.m=m
+        self.h=h
+
+    def set_I_in(self,I):
+        self.I_in
+
+    def solve(self):
+        y = [self.V, self.n, self.m, self.h]
+        solution = odeint(hodgkin_huxley, y, t, args=(I0,))
+        self.V = solution[:, 0]
+        self.n = solution[:, 1]
+        self.m = solution[:, 2]
+        self.h = solution[:, 3]
+    def init_solve(self,y0):
+        solution = odeint(hodgkin_huxley, y0, t, args=(I0,))
+        self.V = solution[:, 0]
+        self.n = solution[:, 1]
+        self.m = solution[:, 2]
+        self.h = solution[:, 3]
+
+
+weights =[1,1,1,1]
+Network = [] #empty arrayleeres Netzwerk array
+
+for x in range(5):  # appending von insg. 5 Neuronen
+    Network.append(Neuron())
+
+
