@@ -2,7 +2,7 @@ import Neurons as N
 import numpy as np
 import random
 
-def TestChessboard(Chessboard,weights,korrekt):
+def TestChessboard(Chessboard,weights,korrekt):         #Methode zur Überprüfung ob ein Schachbrett korrekt identifiziert/nicht identifiziert wird (1DArray,1DArray,Boolean)
 
     Neurons = N.setupNetwork(Chessboard) # Erstellung und Anregung der Input-Neuronen nach Brettvorlage
 
@@ -31,12 +31,53 @@ def TestChessboard(Chessboard,weights,korrekt):
         else:
             return True
 
+def TestAllChessboards(Chessboards,weights,areChessboards):    #Funktion zur Überprüfung , ob das gesamte Set fehlerfrei erkannt werden konnte (2DArray, 1DArray, 1DArray)
+    fehlerfrei=True
+    for i in range(len(Chessboards)):       #Durchgehen aller Chessboard um zu überprüfen, ob einen falsch erkannt wurde
+        if TestChessboard(Chessboards[i],weights,areChessboards[i]):    #Fall, dass Board korrekt erkannt wurde
+            fehlerfrei=True
+        else:                                                           #Fall, dass Board Fehlidentifiziert wurde
+            fehlerfrei=False
+    return fehlerfrei                                                   #Rückgabe, ob alle Boards korrekt erkannt werden konnten
+
+
 weights=np.zeros(4,dtype=float)     #Initioaliseren der Anfangsgewichte
 for i in range(4):                          #Zufälliges Wählen der Anfangsgewichte mit Werten zw. 0 und 1
     weights[i] = random.randrange(0,1)
 
-def training_round(Chessboard,init_weights,isChessboard):
-    weights=init_weights
+#Trainingschessboards
+chessboards=[
+[0,0,1,1],      #False
+[0,1,1,0],      #True
+[0,1,0,1],      #False
+[0,1,1,0],      #True
+[1,0,0,1],      #False
+[0,1,1,0],      #True
+[1,0,1,0],      #False
+[0,1,1,0],      #True
+[1,1,0,0],      #False
+[0,1,1,0],      #True
+]
+isChessboard=[False,True,False,True,False,True,False,True,False,True]#Liste ob Element aus chessboards echtes Schachbrettmuster ist
 
-    TestChessboard(Chessboard,init_weights,isChessboard)
-    if
+
+def training(Chessboards,init_weights,areChessboard):       #Trainingsmethode, welche solange Gewichte anpasst, bis alle Boards fehlerfrei erkannt werden und die finalen
+    currentWeights=init_weights
+    runs =0
+    while (not TestAllChessboards(Chessboards,currentWeights,areChessboard)):
+        currentWeights=(currentWeights,Chessboards,areChessboard)
+        runs+=1
+    print("Finale Gewichte: ",currentWeights)
+    print("Total runs needed:",runs)
+    
+
+def adjustWeights(currentWeights,Chessboards,areChessboard):
+
+
+
+
+
+
+
+
+training(chessboards,weights,isChessboard)      #Aufrufen der Trainigsmethode
