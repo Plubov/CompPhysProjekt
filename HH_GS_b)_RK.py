@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
+startzeit = time.time() # Zeitnahme zu Beginn des Codes
 # Parameter
 Cm = 1.0  # Membrankapazität in uF/cm^2
 gK = 36.0  # Maximale Leitfähigkeit für Kalium in mS/cm^2
@@ -12,7 +14,7 @@ EL = -54.387  # Umkehrpotential für Leckstrom in mV
 I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
 
 # Zeitparameter
-dt = 0.01  # Zeitschritt in ms
+dt = 0.01  # Zeitschritt in ms (maximales dt: 0.092)
 t_max = 50.0  # Maximale Zeit in ms
 num_steps = int(t_max / dt)  # Anzahl der Zeitschritte
 
@@ -26,48 +28,28 @@ h = 0.5961  # Initialer Wert von h
 # Funktionen für alpha und beta
 def alpha_n(V):
     return 0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))
-
-
 def beta_n(V):
     return 0.125 * np.exp(-(V + 65) / 80)
-
-
 def alpha_m(V):
     return 0.1 * (V + 40) / (1 - np.exp(-(V + 40) / 10))
-
-
 def beta_m(V):
     return 4.0 * np.exp(-(V + 65) / 18)
-
-
 def alpha_h(V):
     return 0.07 * np.exp(-(V + 65) / 20)
-
-
 def beta_h(V):
     return 1 / (1 + np.exp(-(V + 35) / 10))
-
-
 # Differentialgleichungen
 def dVdt(V, n, m, h, I0):
     I_Na = gNa * m ** 3 * h * (V - ENa)
     I_K = gK * n ** 4 * (V - EK)
     I_L = gL * (V - EL)
     return (I0 - I_Na - I_K - I_L) / Cm
-
-
 def dndt(V, n):
     return alpha_n(V) * (1 - n) - beta_n(V) * n
-
-
 def dmdt(V, m):
     return alpha_m(V) * (1 - m) - beta_m(V) * m
-
-
 def dhdt(V, h):
     return alpha_h(V) * (1 - h) - beta_h(V) * h
-
-
 # Arrays zur Speicherung der Werte
 V_values = np.zeros(num_steps)
 n_values = np.zeros(num_steps)
@@ -138,3 +120,6 @@ plt.legend()
 
 plt.tight_layout()
 plt.show()
+
+endzeit = time.time()
+print("Laufzeit (Runge-Kutta:", endzeit-startzeit)

@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
+startzeit = time.time() #Zeitnahme zu Beginn des Codes
 # Parameter
 Cm = 1.0  # Membrankapazität in uF/cm^2
 gK = 36.0  # Maximale Leitfähigkeit für Kalium in mS/cm^2
@@ -12,7 +14,7 @@ EL = -54.387  # Umkehrpotential für Leckstrom in mV
 I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
 
 # Zeitparameter
-dt = 0.070  # Zeitschritt in ms (maximaler Zeitschritt bei dem nicht alles in Flammen aufgeht: 0.07)
+dt = 0.01  # Zeitschritt in ms (maximaler Zeitschritt bei dem nicht alles in Flammen aufgeht: 0.07)
 t_max = 50.0  # Maximale Zeit in ms
 num_steps = int(t_max / dt)  # Anzahl der Zeitschritte
 
@@ -22,31 +24,19 @@ n = 0.3177  # Initialer Wert von n
 m = 0.0529  # Initialer Wert von m
 h = 0.5961  # Initialer Wert von h
 
-
 # Funktionen für alpha und beta
 def alpha_n(V):
     return 0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))
-
-
 def beta_n(V):
     return 0.125 * np.exp(-(V + 65) / 80)
-
-
 def alpha_m(V):
     return 0.1 * (V + 40) / (1 - np.exp(-(V + 40) / 10))
-
-
 def beta_m(V):
     return 4.0 * np.exp(-(V + 65) / 18)
-
-
 def alpha_h(V):
     return 0.07 * np.exp(-(V + 65) / 20)
-
-
 def beta_h(V):
     return 1 / (1 + np.exp(-(V + 35) / 10))
-
 
 # Arrays zur Speicherung der Werte
 V_values = np.zeros(num_steps)
@@ -105,3 +95,6 @@ plt.legend()
 
 plt.tight_layout()
 plt.show()
+
+endzeit = time.time() # Zeitnahme am Ende des Codes
+print('Laufzeit (Euler-Verfahren):', endzeit - startzeit)
