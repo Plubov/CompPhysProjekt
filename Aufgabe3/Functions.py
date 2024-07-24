@@ -11,7 +11,7 @@ EL = -54.387  # Umkehrpotential für Leckstrom in mV
 I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
 
 
-# Funktionen für alpha und beta
+# Funktionen für alpha und beta zur Verwendung in DGLs
 def alpha_n(V):
     return 0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))
 
@@ -36,8 +36,8 @@ def beta_h(V):
     return 1 / (1 + np.exp(-(V + 35) / 10))
 
 
-# Differentialgleichungssystem
-def hodgkin_huxley(y, t, I0):
+# Differentialgleichungssystem für konstanten Input Strom (Verwendnug in Output Neuron)
+def hodgkin_huxley(y, t, I0):   # (Parameterstartwerte, Zeit, konst. äußerer Strom)
     V, n, m, h = y
     I_Na = gNa * m ** 3 * h * (V - ENa)
     I_K = gK * n ** 4 * (V - EK)
@@ -70,8 +70,4 @@ def hodgkin_huxley_dynamic(y, t,Activated):  # DGL System, welches Stromimpulse 
     return [dVdt, dndt, dmdt, dhdt]
 
 
-def Impuls(t_start, t_end, I0, I1, t):
-    if (t >= t_start) and (t <= t_end):
-        return I1
-    else:
-        return I0
+
