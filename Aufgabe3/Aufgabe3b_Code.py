@@ -11,7 +11,7 @@ gL = 0.3  # Maximale Leitfähigkeit für Leckstrom in mS/cm^2
 EK = -77.0  # Umkehrpotential für Kalium in mV
 ENa = 50.0  # Umkehrpotential für Natrium in mV
 EL = -54.387  # Umkehrpotential für Leckstrom in mV
-I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
+I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2     !-----Ändern für Stromimpuls--------!
 
 # Zeitparameter
 dt = 0.01  # Zeitschritt in ms

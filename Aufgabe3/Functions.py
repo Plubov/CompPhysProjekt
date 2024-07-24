@@ -61,5 +61,8 @@ def hodgkin_huxley_dynamic(y, t, I,I_t):       # DGL System, welches Stromimpuls
 
     return [dVdt, dndt, dmdt, dhdt]
 
-def test():
-    print("Test erfolgreich!")
+def Impuls(t_start,t_end,I0,I1,t):
+    if (t >= t_start)and(t<=t_end):
+        return I1
+    else:
+        return I0
