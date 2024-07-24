@@ -2,7 +2,7 @@ import numpy as np
 import Functions as func
 from scipy.integrate import odeint
 
-# Parameter
+# Parameter zur Neuronensimulation
 Cm = 1.0  # Membrankapazität in uF/cm^2
 gK = 36.0  # Maximale Leitfähigkeit für Kalium in mS/cm^2
 gNa = 120.0  # Maximale Leitfähigkeit für Natrium in mS/cm^2
@@ -17,7 +17,7 @@ t_max = 50.0  # Maximale Zeit in ms
 t = np.linspace(0, t_max, int(t_max / dt))  # Zeitvektor
 
 
-V0 = -5.0  # Initiales Membranpotential in mV
+V0 = -65.0  # Initiales Membranpotential in mV
 # Anfangsbedingungen Infos
 #n0 = 0.3177  # Initialer Wert von n
 #m0 = 0.0529  # Initialer Wert von m
@@ -35,7 +35,7 @@ V0 = -5.0  # Initiales Membranpotential in mV
 class Neuron:
 
     Field = False
-    Solution=[]
+    Solution = []
     n0 = 0.3177  # Initialer Wert von n
     m0 = 0.0529  # Initialer Wert von m
     h0 = 0.5961  # Initialer Wert von h
@@ -48,7 +48,11 @@ class Neuron:
     def get_V_Out(self):
         return self.Solution[:, 0]
     def get_V_max(self):
-        return max(self.Solution[:, -1])
+        if max(self.Solution[:,0])<-5:#Verhindern, dass I<I0 vorkommt
+            return -5
+        return  max(self.Solution[:,0])
+
+
 
 class TargetNeuron:
     I_ext_max=0
@@ -72,7 +76,7 @@ class TargetNeuron:
 def setupNetwork(chessboard):
     Neurons=[]
     for x in range(4):  # appending empty objects
-        if chessboard[x]==1:         #Initialiseirt die Input Neuronen mit entsprechenden Startspannungen, je nach Schwarz/Weiss
+        if chessboard[x] == 1:         #Initialiseirt die Input Neuronen mit entsprechenden Startspannungen, je nach Schwarz/Weiss
             Neurons.append(Neuron(True))   #Neuron Aktiviert
         else:
             Neurons.append(Neuron(False))  #Neuron Deaktiviert

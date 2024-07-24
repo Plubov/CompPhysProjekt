@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 
-Chessboard=[0,0,0,0]# 1=Weiss, 0=Schwarz
+Chessboard=[0,1,1,0]# 1=Weiss, 0=Schwarz
 
 Neurons= N.setupNetwork(Chessboard)#Erstellt Neuronennetz, welche durch Schachfelder aktiviert werden
 
@@ -23,10 +23,10 @@ I_5=0 # Letzendliche Äußere maximale Stromstärke an Output Neuron als Summe a
 
 
 for i in range(0,len(V_Features_Out)): # Addiren aller Spannungen der Input Neuronen mult. mit ihrem Gewicht
+    print("V_out[",i,"]=",V_Features_Out[i])
     I_5 += weights[i]*V_Features_Out[i]
 
-if I_5<-5:      #Verhinderung, dass I < I0 vorkommt
-    I_5=-5
+print("I_5=",I_5)
 TargetNeuron = N.TargetNeuron(I_5)     # Erstellen der Target Neurons mit der Übergabe der zuvor berechneten maximalen gewichteten Anregungsspannung
 
 
