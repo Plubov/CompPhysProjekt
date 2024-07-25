@@ -1,5 +1,10 @@
 import numpy as np
-import random
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+import matplotlib.pyplot as plt
+import time
+
+st = time.time()
 
 # Anzahl der Muster
 total_patterns = 1000
@@ -28,7 +33,7 @@ for _ in range(checkerboard_patterns):
 for _ in range(total_patterns - checkerboard_patterns):
     while True:
         pattern = random_pattern()
-        # Überprüfen, ob es kein Schachbrettmuster ist (keine zwei benachbarten Felder dürfen gleich sein)
+        # Überprüfen, ob es kein Schachbrettmuster ist
         if not (pattern == [0, 1, 1, 0] or pattern == [1, 0, 0, 1]):
             patterns.append(pattern)
             labels.append(0)
@@ -36,13 +41,30 @@ for _ in range(total_patterns - checkerboard_patterns):
 
 # Zufälliges Mischen der Muster und Labels
 combined = list(zip(patterns, labels))
-random.shuffle(combined)
+np.random.shuffle(combined)
 patterns[:], labels[:] = zip(*combined)
 
-# Konvertieren der Listen in numpy Arrays, geeignet für TensorFlow
-patterns_array = np.array(patterns).reshape(total_patterns, 2, 2)
+# Konvertieren der Listen in numpy Arrays
+patterns_array = np.array(patterns)
 labels_array = np.array(labels)
 
+# Definieren des Modells
+model = Sequential()
+model.add(Dense(8, input_dim=4, activation='relu'))  # Erster Layer mit 8 Neuronen und ReLU
+model.add(Dense(4, activation='relu'))  # Zweiter Layer mit 4 Neuronen und ReLU
+model.add(Dense(1, activation='sigmoid'))  # Output Layer mit 1 Neuron und Sigmoid
 
+# Kompilieren des Modells
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+# Training des Modells
+history = model.fit(patterns_array, labels_array, epochs=100, batch_size=10)
 
+# Vorhersagen machen
+predictions = model(patterns_array)
+
+#
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['loss'])
+plt.legend(['Accuracy', 'Loss'])
+plt.show()
