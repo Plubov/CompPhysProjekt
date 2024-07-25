@@ -48,7 +48,7 @@ TestChessboard(Chessboard3,weights,False)
 TestChessboard(Chessboard4,weights,False)
 
 #Setzen der Gewichte auf optimale Werte
-weights=[0,0.4,0.4,0]
+weights=[0.,.05,.05,0]
 print("-------Versuche mit optimierten Gewichten--------")
 #Testen der verschiedenen Schachbretter mit optimalen Gewichten
 TestChessboard(Chessboard1,weights,True)

@@ -62,6 +62,15 @@ def sigmoid(x):
 
 def sigmoid_derivative(x):
     return sigmoid(x) * (1 - sigmoid(x))
+def binary_cross_entropy(y_true, y_pred):
+    # Vermeidung von log(0) durch Clipping der Werte
+    y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
+    return -(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+
+def binary_cross_entropy_derivative(y_true, y_pred):
+    # Vermeidung von Division durch 0 durch Clipping der Werte
+    y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
+    return (y_pred - y_true) / (y_pred * (1 - y_pred))
 
 
 def train_nn(initial_weights, training_boards, targets, learning_rate=0.1, epochs=10000):
@@ -69,21 +78,28 @@ def train_nn(initial_weights, training_boards, targets, learning_rate=0.1, epoch
     weights = np.array(initial_weights)
 
     for epoch in range(epochs):
+        total_loss = 0
         for board, target in zip(training_boards, targets):
             # Forward Pass
             z = np.dot(board, weights)
             prediction = sigmoid(z)
 
-            # Fehler berechnen
-            error = target - prediction
+            # Berechne Binary Cross Entropy Loss
+            loss = binary_cross_entropy(target, prediction)
+            total_loss += loss
 
             # Rückwärtspropagation
-            adjustments = error * sigmoid_derivative(z)
+            error_derivative = binary_cross_entropy_derivative(target, prediction)
+            adjustments = error_derivative * sigmoid_derivative(z)
 
             # Gewichte anpassen
-            weights += learning_rate * adjustments * np.array(board)
+            weights -= learning_rate * adjustments * np.array(board)
 
     return weights
+
+
+
+
 def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.1, epochs=10000):#Trainingsmethode, welche das Plotten der gemachten fehler für Aufgabe 3e) ermöglicht
     # Initialisiere die Gewichte
 
@@ -94,21 +110,27 @@ def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.
     weight_history=[]
     errors=[]
     for epoch in range(epochs):
+        total_loss = 0
         for board, target in zip(training_boards, targets):
             # Forward Pass
             z = np.dot(board, weights)
             prediction = sigmoid(z)
 
-            # Fehler berechnen
-            error = target - prediction
+            # Berechne Binary Cross Entropy Loss
+            loss = binary_cross_entropy(target, prediction)
+            total_loss += loss
 
             # Rückwärtspropagation
-            adjustments = error * sigmoid_derivative(z)
+            error_derivative = binary_cross_entropy_derivative(target, prediction)
+            adjustments = error_derivative * sigmoid_derivative(z)
 
             # Gewichte anpassen
-            weights += learning_rate * adjustments * np.array(board)
+            weights -= learning_rate * adjustments * np.array(board)
+            # Gewichte auf den Bereich [0, 1] begrenzen
+            weights = np.clip(weights, 0, 1)
+        errors.append(loss)
         weight_history.append(np.copy(weights))
-        errors.append(error)
+
 
 
     return weights,x_achse,errors,weight_history
@@ -126,23 +148,20 @@ def make_training_set(size=100,true_boards=50):     #Funktion, welche ein Traini
     for i in range(size):
         arechessboards.append(False)
     already_set=[]                      #Liste zur überprüfung ob Element aus chessboads bereits generiert wurde
-    for i in range(0,true_boards):      #Initiales Auffüllen aller wahren boards an zufälligen stellen
+    for i in range(true_boards):      #Initiales Auffüllen aller wahren boards an zufälligen stellen
         spot=random.randint(0,size-1)#Spot zum Auffüllen in chessboards
         while spot in already_set:      #Überpfrüfung, ob spot bereits platziert wurde, wenn ja dann suche neuen spot
             spot=random.randint(0,size-1)
         chessboards[spot]=[0,1,1,0]  #Platzierung von wahrem Board in spot
-        already_set.append(spot)                        #Markierung, dass chessboard an spot bereits aufgefüllt wurde
+        already_set.append(spot)         #Markierung, dass chessboard an spot bereits aufgefüllt wurde
     still_left=[]                       #Orte die noch aufgefüllt werden müssen
     for i in range(size):
         if i not in already_set:         #Wenn in i noch nicht gesetzt wurde soll dies in liste noch zu setzender Felder hinzugefügt werden
             still_left.append(i)
 
     for i in still_left:      #Restliches Auffüllen aller falschen Boards
-        spot=random.randint(0,size-1)#Spot zum Auffüllen in chessboards
-        while spot in already_set:      #Überpfrüfung, ob spot bereits platziert wurde, wenn ja dann suche neuen spot
-            spot=random.randint(0,size-1)
-        chessboards[spot]=gen_False_board()  #Platzierung von falschem Board
-        already_set.append(spot)        #Markierung, dass chessboard an spot bereits aufgefüllt wurde
+       chessboards[i]=gen_False_board()  #Platzierung von falschem Board
+
     for i in range(size):           #Erstellen der Wahrheitsliste ob Board auch Schachbrettmuster ist
         if np.array_equal(chessboards[i],[0,1,1,0]):
             arechessboards.append(True)
@@ -164,9 +183,11 @@ chessboards,isChessboard=make_training_set(10,5)
 optimal_weights=[]
 
 print(chessboards)
+print(isChessboard)
 
 #optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode (Für Aufgabe 3d)
 #-----Code Für Aufgabe 3e)------------
+#Plotten des Fehlers im Verlauf der Epochen
 x_achse=[]
 errors=[]
 weight_history=[]
@@ -174,9 +195,9 @@ optimal_weights,x_achse,errors,weight_history= train_nn_history(weights,chessboa
 weight_history=np.array(weight_history)
 plt.plot(x_achse,errors)
 plt.xlabel("Durchlauf")
-plt.ylabel("Error")
+plt.ylabel("Epoche")
 plt.show()
-print(weight_history)
+#Plotten der Gewichte im Verlauf der Epochen
 plt.plot(x_achse,weight_history[:,0],label="Gewicht1")
 plt.plot(x_achse,weight_history[:,1],label="Gewicht2")
 plt.plot(x_achse,weight_history[:,2],label="Gewicht3")
