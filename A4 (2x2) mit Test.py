@@ -2,6 +2,7 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import matplotlib.pyplot as plt
+import random
 
 def Data(total_patterns,chessboard_patterns): # Definiere eine Funktion, die einen Datensatz der gewünschten GRöße erstellt
 
@@ -13,7 +14,7 @@ def Data(total_patterns,chessboard_patterns): # Definiere eine Funktion, die ein
 
     # Funktion, um ein Schachbrettmuster zu erstellen
     def chessboard_pattern():
-        return [0, 1, 1, 0]
+        return random.choice([[0, 1, 1, 0], [1, 0, 0, 1]])
 
     # Listen für Muster und Labels
     patterns = []
@@ -44,14 +45,14 @@ def Data(total_patterns,chessboard_patterns): # Definiere eine Funktion, die ein
     labels_array = np.array(labels)
     return patterns_array, labels_array
 
-# Erzeuge Trainings- und Testdaten
+# Erzeuge Trainings- und Testdaten mit beleibiger Anzahl von Mustern (insgesamt) und Schachbrettmustern
 Trainingdata = Data(1000, 500)
-Testdata = Data(300, 80)
+Testdata = Data(420, 69)
 
 # Definieren des Modells
 model = Sequential()
-#model.add(Dense(8, input_dim=4, activation='relu'))  # Erster Layer mit 8 Neuronen und ReLU
-model.add(Dense(4, activation='relu'))  # Zweiter Layer mit 4 Neuronen und ReLU
+model.add(Dense(4, input_dim=4, activation='relu'))  # Input Layer mit 4 Neuronen
+#model.add(Dense(4, activation='relu'))  # Hier lässt sich eine weitere Layer einfügen, die bei weniger Epochen bereits für geringere Losses sorgt
 model.add(Dense(1, activation='sigmoid'))  # Output Layer mit 1 Neuron und Sigmoid
 
 # Kompilieren des Modells
@@ -72,5 +73,6 @@ plt.show()
 # Testen, ob das Modell die Schachbretter gut erkennt
 loss, accuracy = model.evaluate(Testdata[0], Testdata[1])
 print(f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
-#print(model.summary())
-#print(model.get_weights())
+#print(model.summary()) # Ausgabe der wichtigsten Informationen über das Modell
+#print(model.get_weights()) # Ausgabe mit den Wichtungsfaktoren der Neuronen
+print(Testdata[0], Testdata[1])

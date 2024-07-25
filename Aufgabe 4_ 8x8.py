@@ -72,6 +72,12 @@ history = model.fit(Trainingdata[0], Trainingdata[1], epochs=10, batch_size=10)
 # Vorhersagen machen
 predictions = (model.predict(Trainingdata[0]) > 0.5).astype("int32")
 
+# Plot des Loss und der Accuracy im Verlauf der Epochen
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['loss'])
+plt.legend(['Accuracy', 'Loss'])
+plt.show()
+
 # Testen, ob das Modell die Schachbretter gut erkennt
 loss, accuracy = model.evaluate(Testdata[0], Testdata[1])
 print(f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
