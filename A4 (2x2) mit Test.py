@@ -42,15 +42,15 @@ def Data(total_patterns,chessboard_patterns): # Definiere eine Funktion, die ein
     # Konvertieren der Listen in numpy Arrays
     patterns_array = np.array(patterns)
     labels_array = np.array(labels)
-    return patterns_array, labels_array, total_patterns
+    return patterns_array, labels_array
 
 # Erzeuge Trainings- und Testdaten
 Trainingdata = Data(1000, 500)
-Testdata = Data(30, 8)
+Testdata = Data(300, 80)
 
 # Definieren des Modells
 model = Sequential()
-model.add(Dense(8, input_dim=4, activation='relu'))  # Erster Layer mit 8 Neuronen und ReLU
+#model.add(Dense(8, input_dim=4, activation='relu'))  # Erster Layer mit 8 Neuronen und ReLU
 model.add(Dense(4, activation='relu'))  # Zweiter Layer mit 4 Neuronen und ReLU
 model.add(Dense(1, activation='sigmoid'))  # Output Layer mit 1 Neuron und Sigmoid
 
@@ -69,8 +69,8 @@ plt.plot(history.history['loss'])
 plt.legend(['Accuracy', 'Loss'])
 plt.show()
 
-"""for i in range(len(Testdata[2])): # Schleife, die das Modell mit den Testdaten testet und anschließend den mittleren Loss ausgibt
-    prediction = model.predict(Testdata[0])"""
-
-loss, accuracy = model.evaluate(test_patterns_array, test_labels_array)
+# Testen, ob das Modell die Schachbretter gut erkennt
+loss, accuracy = model.evaluate(Testdata[0], Testdata[1])
 print(f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+#print(model.summary())
+#print(model.get_weights())
