@@ -45,7 +45,15 @@ def TestAllChessboards(Chessboards,weights,areChessboards):    #Funktion zur Üb
         else:
             print("Test nicht erfolgreich!")
 
-
+def quick_check(Chessboards,weights,areChessboards): #Schnellere Methode wie TestAllChessboards, nur ohne einzenle Zwischenergebnisse
+    success = True
+    for i in range(len(Chessboards)):  # Durchgehen aller Chessboard um zu überprüfen, ob einen falsch erkannt wurde
+        if not TestChessboard(Chessboards[i], weights, areChessboards[i]):  # Fall, ein Board fehlerhaft erkannt wurde
+            success = False
+    if success:
+        print("Test erfolgreich!")  # Rückgabe, ob alle Boards korrekt erkannt werden konnten
+    else:
+        print("Test nicht erfolgreich!")
 
 
 def sigmoid(x):
@@ -76,12 +84,12 @@ def train_nn(initial_weights, training_boards, targets, learning_rate=0.1, epoch
             weights += learning_rate * adjustments * np.array(board)
 
     return weights
-def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.1, epochs=100):#Trainingsmethode, welche das Plotten der gemachten fehler für Aufgabe 3e) ermöglicht
+def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.1, epochs=10000):#Trainingsmethode, welche das Plotten der gemachten fehler für Aufgabe 3e) ermöglicht
     # Initialisiere die Gewichte
-    weights = np.array(initial_weights)
+
     #Modifizierung zur Fehlerplottung
     error=0
-    weights=initial_weights
+    weights=np.copy(initial_weights)
     x_achse=np.linspace(1,epochs,epochs)
     weight_history=[]
     errors=[]
@@ -99,8 +107,9 @@ def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.
 
             # Gewichte anpassen
             weights += learning_rate * adjustments * np.array(board)
+        weight_history.append(np.copy(weights))
         errors.append(error)
-        weight_history.append(weights)
+
 
     return weights,x_achse,errors,weight_history
 def gen_False_board():     #Funktion zur zufälligen erzeugung eines Schachbretts mit rückgabe, ob es ei korrektes Schachbrett ist
@@ -156,7 +165,7 @@ optimal_weights=[]
 
 print(chessboards)
 
-#optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode
+#optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode (Für Aufgabe 3d)
 #-----Code Für Aufgabe 3e)------------
 x_achse=[]
 errors=[]
@@ -179,6 +188,6 @@ plt.show()
 
 #-----Ende Code für Aufgabe 3e)
 
-TestAllChessboards(chessboards,optimal_weights,isChessboard)
+quick_check(chessboards,optimal_weights,isChessboard)
 print("Anfängliche Gewichte: ",initweights)
 print("Die optimalen gefundenen Gewichte: ",optimal_weights)
