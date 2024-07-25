@@ -12,7 +12,7 @@ EL = -54.387  # Umkehrpotential für Leckstrom in mV
 I0 = 10.0  # Konstanter angelegter Strom in uA/cm^2
 
 # Zeitparameter
-dt = 0.070  # Zeitschritt in ms (maximaler Zeitschritt bei dem nicht alles in Flammen aufgeht: 0.07)
+dt = 0.07  # Zeitschritt in ms (maximaler Zeitschritt bei dem nicht alles in Flammen aufgeht: 0.07)
 t_max = 50.0  # Maximale Zeit in ms
 num_steps = int(t_max / dt)  # Anzahl der Zeitschritte
 
