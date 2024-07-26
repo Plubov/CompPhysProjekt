@@ -69,10 +69,16 @@ class TargetNeuron:
     def __init__(self,I_ext_max):#Konstruktor, welcher als einziges Attribut die bereits gewichtete Spannungskurve der vorgeschaltetetn Neuronen erhält
         self.I_ext_max = I_ext_max
         self.Solution = odeint(func.hodgkin_huxley, self.y0, t,args=(I_ext_max,))      #Speichern der Spannungskurven in das Objekt
-
+    def get_V_Out(self):
+        return self.Solution[:, 0]
+    def get_V_max(self):
+        if max(self.Solution[:,0])<-5:#Verhindern, dass I<I0 vorkommt
+            return -5
+        return  max(self.Solution[:,0])
 
     def get_activation(self):            #Ausgabe der eigenen Aktivierung
         return self.Solution[:,2]           # Gibt Aktivierung(m-Variable) zurück
+
 def setupNetwork(chessboard):
     Neurons=[]
     for x in range(4):  # appending empty objects

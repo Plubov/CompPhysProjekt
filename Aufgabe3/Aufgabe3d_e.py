@@ -48,7 +48,7 @@ def TestAllChessboards(Chessboards,weights,areChessboards):    #Funktion zur Üb
 def quick_check(Chessboards,weights,areChessboards): #Schnellere Methode wie TestAllChessboards, nur ohne einzenle Zwischenergebnisse
     success = True
     for i in range(len(Chessboards)):  # Durchgehen aller Chessboard um zu überprüfen, ob einen falsch erkannt wurde
-        if not TestChessboard(Chessboards[i], weights, areChessboards[i]):  # Fall, ein Board fehlerhaft erkannt wurde
+        if not TestChessboard(Chessboards[i], weights, areChessboards[i]):  # Falls, ein Board fehlerhaft erkannt wurde
             success = False
     if success:
         print("Test erfolgreich!")  # Rückgabe, ob alle Boards korrekt erkannt werden konnten
@@ -136,8 +136,8 @@ def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.
     return weights,x_achse,errors,weight_history
 def gen_False_board():     #Funktion zur zufälligen erzeugung eines Schachbretts mit rückgabe, ob es ei korrektes Schachbrett ist
     pattern = [0, 1, 1, 0]  # Wahres Feld
-
-    np.random.shuffle(pattern)  #Verändert das Schachbrett, sodass es kein wahres Feld mehr ist aber noch 2 1eun und nullen besitzt
+    while np.array_equal(pattern,[0,1,1,0]):
+        np.random.shuffle(pattern)  #Verändert das Schachbrett, sodass es kein wahres Feld mehr ist aber noch 2 1eun und nullen besitzt
     return pattern
 
 
@@ -145,8 +145,6 @@ def gen_False_board():     #Funktion zur zufälligen erzeugung eines Schachbrett
 def make_training_set(size=100,true_boards=50):     #Funktion, welche ein Trainingsset (Chessboards und Wahrheitsliste) mit gewünschter Größe und Anteil wahrer Boards enthält
     chessboards=np.zeros((size,4))      #Initialisierung leerer Chessboards
     arechessboards=[]               #Initialisierung leerer Wahrheitsliste
-    for i in range(size):
-        arechessboards.append(False)
     already_set=[]                      #Liste zur überprüfung ob Element aus chessboads bereits generiert wurde
     for i in range(true_boards):      #Initiales Auffüllen aller wahren boards an zufälligen stellen
         spot=random.randint(0,size-1)#Spot zum Auffüllen in chessboards
@@ -169,23 +167,23 @@ def make_training_set(size=100,true_boards=50):     #Funktion, welche ein Traini
             arechessboards.append(False)
 
     return chessboards,arechessboards
+#-------Ende Definitoinen-----------------------
 
 
-
-
+#-------Beginn Aufgeführter Code----------------
 
 weights=np.zeros(4,dtype=float)     #Initialiseren der Anfangsgewichte
 for i in range(4):                          #Zufälliges Wählen der Anfangsgewichte mit Werten zw. 0 und 1
     weights[i] = random.uniform(0.,1.)
-initweights=weights
+initweights=np.copy(weights)
 #Trainingschessboards
-chessboards,isChessboard=make_training_set(10,5)
+chessboards,isChessboard=make_training_set(50,25)
 optimal_weights=[]
 
 print(chessboards)
 print(isChessboard)
 
-#optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode (Für Aufgabe 3d)
+optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode (Für Aufgabe 3d)
 #-----Code Für Aufgabe 3e)------------
 #Plotten des Fehlers im Verlauf der Epochen
 x_achse=[]

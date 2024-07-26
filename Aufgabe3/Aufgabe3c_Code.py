@@ -18,15 +18,15 @@ def TestChessboard(Chessboard,weights,korrekt):
 
     if I_5 < -5:  # Verhinderung, dass I < I0 vorkommt
         I_5 = -5
-    TargetNeuron = N.TargetNeuron(I_5)  #Initioalisierung Target-Neuron mit endgültiger angelegter Spannung
-
+    TargetNeuron = N.TargetNeuron(I_5)  #Initialisierung Target-Neuron mit endgültiger angelegter Spannung
+    print("I_5: ",I_5)
     print("Maximale Aktivierung des Target neurons: ",max(TargetNeuron.get_activation()))  # Ausgabe der Aktivierung (Erkennungswahrscheinlichkeit für Schachbrett) des Target-Neuurons
 
     if max(TargetNeuron.get_activation())>=.5:
         if korrekt:
             print("Success!: Schachbrettmuster korrekt erkannt")
         else:
-            print("Fail!: Schachbrettmuster Fehlerhaft erkannt")
+            print("Fail!: Schachbrettmuster fälschlicherweise erkannt")
     else:
         if korrekt:
             print("Fail! : Schachbrettmuster fälschlicherweise nicht erkannt")
@@ -50,6 +50,7 @@ TestChessboard(Chessboard4,weights,False)
 #Setzen der Gewichte auf optimale Werte
 weights=[0.,.05,.05,0]
 print("-------Versuche mit optimierten Gewichten--------")
+print("Optimale Gewichte: ",weights)
 #Testen der verschiedenen Schachbretter mit optimalen Gewichten
 TestChessboard(Chessboard1,weights,True)
 TestChessboard(Chessboard2,weights,False)
