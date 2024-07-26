@@ -34,28 +34,28 @@ V0 = -65.0  # Initiales Membranpotential in mV
 #Definieren der Klasse Neuron mit sämtlichen für das neuronale Netzwerk relevanten Funktionen
 class Neuron:
 
-    Field = False
-    Solution = []
+    Field = False   #Ob Neuron aktiv ist
+    Solution = []   #Speicherung der Zeitentwicklung der internen Variablen
     n0 = 0.3177  # Initialer Wert von n
     m0 = 0.0529  # Initialer Wert von m
     h0 = 0.5961  # Initialer Wert von h
     y0 = [V0, n0, m0, h0]
-    def __init__(self,Field):#Konstruktor, welcher Übergibt, ob das Neuron Schwarz/False, Weiss/True ist
+    def __init__(self,Field):#Konstruktor, welcher erhält, ob das Neuron Schwarz/False, Weiss/True ist
         if Field:
             self.Field = True
         self.Solution = odeint(func.hodgkin_huxley_dynamic, self.y0, t, args=(self.Field,))
 
-    def get_V_Out(self):
+    def get_V_Out(self):    #Gibt die zeitl. Entwicklung der Membranspannung zurück
         return self.Solution[:, 0]
-    def get_V_max(self):
+    def get_V_max(self):    #Gibt maximum der eigenen Membranspannung zurück
         if max(self.Solution[:,0])<-5:#Verhindern, dass I<I0 vorkommt
             return -5
         return  max(self.Solution[:,0])
 
 
-
+#Analog zur Klasse Neuron, nur mit Funktionen für target Neuron
 class TargetNeuron:
-    I_ext_max=0
+    I_ext_max=0     #Von anderren Neuronen erhaltene Spannung
     Solution = []
     n0 = 0.3177  # Initialer Wert von n
     m0 = 0.0529  # Initialer Wert von m
@@ -69,7 +69,7 @@ class TargetNeuron:
     def __init__(self,I_ext_max):#Konstruktor, welcher als einziges Attribut die bereits gewichtete Spannungskurve der vorgeschaltetetn Neuronen erhält
         self.I_ext_max = I_ext_max
         self.Solution = odeint(func.hodgkin_huxley, self.y0, t,args=(I_ext_max,))      #Speichern der Spannungskurven in das Objekt
-    def get_V_Out(self):
+    def get_V_Out(self):    #Ausgabe Zeitentwicklung der Membranspannung
         return self.Solution[:, 0]
     def get_V_max(self):
         if max(self.Solution[:,0])<-5:#Verhindern, dass I<I0 vorkommt
@@ -79,9 +79,10 @@ class TargetNeuron:
     def get_activation(self):            #Ausgabe der eigenen Aktivierung
         return self.Solution[:,2]           # Gibt Aktivierung(m-Variable) zurück
 
+#Funktion zur Erstellung und Anregeung der Input Layer Neuronen gemäß Schachbrettmuster
 def setupNetwork(chessboard):
     Neurons=[]
-    for x in range(4):  # appending empty objects
+    for x in range(4):  
         if chessboard[x] == 1:         #Initialiseirt die Input Neuronen mit entsprechenden Startspannungen, je nach Schwarz/Weiss
             Neurons.append(Neuron(True))   #Neuron Aktiviert
         else:

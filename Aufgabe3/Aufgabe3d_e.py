@@ -3,18 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-def TestChessboard(Chessboard,weights,korrekt):         #Methode zur Überprüfung ob ein Schachbrett korrekt identifiziert/nicht identifiziert wird (1DArray,1DArray,Boolean)
+#-----Definitionen nützlicher Funktoinen----------
+
+
+#Neuronales Netz zur Überprüfung ob ein Schachbrett korrekt identifiziert/nicht identifiziert wird (1DArray,1DArray,Boolean)
+def TestChessboard(Chessboard,weights,korrekt):
 
     Neurons = N.setupNetwork(Chessboard) # Erstellung und Anregung der Input-Neuronen nach Brettvorlage
 
     V_Features_Out = [Neurons[0].get_V_max(), Neurons[1].get_V_max(), Neurons[2].get_V_max(),
                       Neurons[3].get_V_max()]  # Sämtliche äußere Spannungsmaxima der Input Neuronen
 
-    I_5 = 0  # Letzendliche Äußere maximale Stromstärke an Output Neuron als Summe aller Spannungen der Feature Neuronen mult. mit ihren Gewichten
 
-    for i in range(0, len(V_Features_Out)):  # Addiren aller Spannungen der Input Neuronen mult. mit ihrem Gewicht
-        I_5 += weights[i] * V_Features_Out[i]
-
+    I_5=np.dot(V_Features_Out,weights)
     if I_5 < -5:  # Verhinderung, dass I < I0 vorkommt
         I_5 = -5
     TargetNeuron = N.TargetNeuron(I_5)  #Initioalisierung Target-Neuron mit endgültiger angelegter Spannung
@@ -32,20 +33,8 @@ def TestChessboard(Chessboard,weights,korrekt):         #Methode zur Überprüfu
         else:
             return True
 
-def TestAllChessboards(Chessboards,weights,areChessboards):    #Funktion zur Überprüfung , ob das gesamte Set fehlerfrei erkannt werden konnte (2DArray, 1DArray, 1DArray)
-    success=True
-    for i in range(len(Chessboards)):       #Durchgehen aller Chessboard um zu überprüfen, ob einen falsch erkannt wurde
-        if TestChessboard(Chessboards[i],weights,areChessboards[i]):    #Fall, dass Board korrekt erkannt wurde
-            print("Success! Schachbrett ",i," korrekt identifiziert")
-        else:                                                           #Fall, dass Board Fehlidentifiziert wurde
-            print("Fail! Schachbrett",i,"falsch Identifiziert")
-            success = False
-        if success:
-            print("Test erfolgreich!")  #Rückgabe, ob alle Boards korrekt erkannt werden konnten
-        else:
-            print("Test nicht erfolgreich!")
-
-def quick_check(Chessboards,weights,areChessboards): #Schnellere Methode wie TestAllChessboards, nur ohne einzenle Zwischenergebnisse
+#Überprüfung durch neuronale Netze, ob Boardset korrekt erkannt wurde
+def network_check(Chessboards,weights,areChessboards):
     success = True
     for i in range(len(Chessboards)):  # Durchgehen aller Chessboard um zu überprüfen, ob einen falsch erkannt wurde
         if not TestChessboard(Chessboards[i], weights, areChessboards[i]):  # Falls, ein Board fehlerhaft erkannt wurde
@@ -56,13 +45,13 @@ def quick_check(Chessboards,weights,areChessboards): #Schnellere Methode wie Tes
         print("Test nicht erfolgreich!")
 
 
-def sigmoid(x):
+def sigmoid(x): #Logistische Sigmoidfunkttion
     return 1 / (1 + np.exp(-x))
 
 
-def sigmoid_derivative(x):
+def sigmoid_derivative(x):      #Ableitung logistischer Sigmoidfunktion
     return sigmoid(x) * (1 - sigmoid(x))
-def binary_cross_entropy(y_true, y_pred):
+def binary_cross_entropy(y_true, y_pred):#Cross entropy Funktion, zur Berechnung des losses, da binäre Ausgabe
     # Vermeidung von log(0) durch Clipping der Werte
     y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
     return -(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
@@ -72,15 +61,15 @@ def binary_cross_entropy_derivative(y_true, y_pred):
     y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
     return (y_pred - y_true) / (y_pred * (1 - y_pred))
 
-
-def train_nn(initial_weights, training_boards, targets, learning_rate=0.1, epochs=10000):
-    # Initialisiere die Gewichte
+#Trainingsalgorythmus zur bestimmung der optimalen Gewichte
+def train_nn(initial_weights, training_boards, targets, learning_rate=0.01, epochs=100):
+    # Initialisieren der Gewichte
     weights = np.array(initial_weights)
 
     for epoch in range(epochs):
         total_loss = 0
         for board, target in zip(training_boards, targets):
-            # Forward Pass
+            # Berechnung Aktivierung z
             z = np.dot(board, weights)
             prediction = sigmoid(z)
 
@@ -99,41 +88,46 @@ def train_nn(initial_weights, training_boards, targets, learning_rate=0.1, epoch
 
 
 
-
-def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.1, epochs=10000):#Trainingsmethode, welche das Plotten der gemachten fehler für Aufgabe 3e) ermöglicht
+#Trainingsalgorythmus zur bestimmung der optimalen Gewichte und Plotten der zeitl. Entwicklung der Gewichte und Fehler
+def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.01, epochs=100):
     # Initialisiere die Gewichte
 
-    #Modifizierung zur Fehlerplottung
-    error=0
+    #----Modifizierung zur Fehlerplottung----
+
     weights=np.copy(initial_weights)
     x_achse=np.linspace(1,epochs,epochs)
     weight_history=[]
-    errors=[]
+    error_history=[]
     for epoch in range(epochs):
         total_loss = 0
-        for board, target in zip(training_boards, targets):
+        weight_history.append(np.copy(weights))
+        errors=0             #Anzahl gemachter Fehler in dieser Runde
+        for board, target in zip(training_boards, targets):     #Iteration über alle Boards des Trainingsets mit zugehörigem Wahrheitswert
             # Forward Pass
             z = np.dot(board, weights)
+            #Vereinfachung der Vorhersage um ständiges Lösen des Neuronen GDL-Systems zu vermeiden
             prediction = sigmoid(z)
 
             # Berechne Binary Cross Entropy Loss
             loss = binary_cross_entropy(target, prediction)
             total_loss += loss
-
-            # Rückwärtspropagation
+            #Überprüfung ob Fehler gemacht wurde (Wenn Loss obere Schwelle überschreitet)
+            if loss>.5:
+                errors+=1
+            # Rückwärtspropagation durch binary cross Ableitung
             error_derivative = binary_cross_entropy_derivative(target, prediction)
             adjustments = error_derivative * sigmoid_derivative(z)
 
             # Gewichte anpassen
-            weights -= learning_rate * adjustments * np.array(board)
-            # Gewichte auf den Bereich [0, 1] begrenzen
-            weights = np.clip(weights, 0, 1)
-        errors.append(loss)
-        weight_history.append(np.copy(weights))
+            weights -= learning_rate * adjustments * board
+
+
+        error_history.append(errors)    #Speichern, wie viele Fehler in der Runde gemacht wurden
 
 
 
-    return weights,x_achse,errors,weight_history
+
+    return weights,x_achse,error_history,weight_history#Rückgabe aller zum Plotten relevanter Daten
 def gen_False_board():     #Funktion zur zufälligen erzeugung eines Schachbretts mit rückgabe, ob es ei korrektes Schachbrett ist
     pattern = [0, 1, 1, 0]  # Wahres Feld
     while np.array_equal(pattern,[0,1,1,0]):
@@ -180,20 +174,21 @@ initweights=np.copy(weights)
 chessboards,isChessboard=make_training_set(50,25)
 optimal_weights=[]
 
-print(chessboards)
-print(isChessboard)
 
-optimal_weights=train_nn(weights,chessboards,isChessboard)      #Aufrufen der Trainigsmethode (Für Aufgabe 3d)
-#-----Code Für Aufgabe 3e)------------
+
 #Plotten des Fehlers im Verlauf der Epochen
 x_achse=[]
 errors=[]
 weight_history=[]
+print("Training...")
+#Trainieren des NN
 optimal_weights,x_achse,errors,weight_history= train_nn_history(weights,chessboards,isChessboard)
+#Umwandlung Weitght Daten für Plotten
 weight_history=np.array(weight_history)
+#Plotten der Gemachten Fehler in jeder Epoche
 plt.plot(x_achse,errors)
-plt.xlabel("Durchlauf")
-plt.ylabel("Epoche")
+plt.xlabel("Epoche")
+plt.ylabel("error")
 plt.show()
 #Plotten der Gewichte im Verlauf der Epochen
 plt.plot(x_achse,weight_history[:,0],label="Gewicht1")
@@ -201,12 +196,14 @@ plt.plot(x_achse,weight_history[:,1],label="Gewicht2")
 plt.plot(x_achse,weight_history[:,2],label="Gewicht3")
 plt.plot(x_achse,weight_history[:,3],label="Gewicht4")
 plt.legend()
+Text=f'Anfangsgewichte: 1:{initweights[0]:.2}\n 2:{initweights[1]:.2}\n 3:{initweights[2]:.2}\n 4:{initweights[3]:.2}'
+plt.text(100,0,Text,ha='right', va='center')
 plt.xlabel("Durchlauf")
 plt.ylabel("Gewicht")
 plt.show()
-
-#-----Ende Code für Aufgabe 3e)
-
-quick_check(chessboards,optimal_weights,isChessboard)
 print("Anfängliche Gewichte: ",initweights)
 print("Die optimalen gefundenen Gewichte: ",optimal_weights)
+
+#Überprüfung, ob Alle Boards richtig erkannt wurden (zum Testen, dauert lange, da Überprüfung über Neuronensimulation)
+#network_check(chessboards,optimal_weights,isChessboard)
+

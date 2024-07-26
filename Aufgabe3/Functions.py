@@ -50,8 +50,8 @@ def hodgkin_huxley(y, t, I0):   # (Parameterstartwerte, Zeit, konst. äußerer S
 
     return [dVdt, dndt, dmdt, dhdt]
 
-
-def hodgkin_huxley_dynamic(y, t,Activated):  # DGL System, welches Stromimpulse erlaubt, wenn Neuron aktiviert
+# DGL System, welches Stromimpulse erlaubt, wenn Neuron aktiviert (Verwendung Input Neuron)
+def hodgkin_huxley_dynamic(y, t,Activated):
     V, n, m, h = y
     if Activated:       #Fallunterscheidung, ob Neuron aktiviert ist, wenn ja wird konstante Anregungsspannung von 15 mA angelegt
         I0 = 15          #Sonst Standbyspannung von -5mA
