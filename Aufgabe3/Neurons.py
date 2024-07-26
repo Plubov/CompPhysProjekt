@@ -82,7 +82,7 @@ class TargetNeuron:
 #Funktion zur Erstellung und Anregeung der Input Layer Neuronen gemäß Schachbrettmuster
 def setupNetwork(chessboard):
     Neurons=[]
-    for x in range(4):  
+    for x in range(4):
         if chessboard[x] == 1:         #Initialiseirt die Input Neuronen mit entsprechenden Startspannungen, je nach Schwarz/Weiss
             Neurons.append(Neuron(True))   #Neuron Aktiviert
         else:

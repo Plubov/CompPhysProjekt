@@ -4,12 +4,12 @@ import Neurons as N
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-
+#Korrektes Chessboard (Wie in Dokumentation)
 Chessboard=[0,1,1,0]# 1=Weiss, 0=Schwarz
 
 Neurons= N.setupNetwork(Chessboard)#Erstellt Neuronennetz, welche durch Schachfelder aktiviert werden
 
-plt.plot(N.t,Neurons[0].get_V_Out(),label='Neuron1')  #Plotten der einzelnen Input-Neuronen Spannungs-Signale (ohne Berücksichtigung der verzögerten Signale)
+plt.plot(N.t,Neurons[0].get_V_Out(),label='Neuron1')  #Plotten der einzelnen Input-Neuronen Spannungs-Signale (ohne Berücksichtigung der Signalverzögerung)
 plt.plot(N.t,Neurons[1].get_V_Out(),label='Neuron2')
 plt.plot(N.t,Neurons[2].get_V_Out(),label='Neuron3')
 plt.plot(N.t,Neurons[3].get_V_Out(),label='Neuron4')

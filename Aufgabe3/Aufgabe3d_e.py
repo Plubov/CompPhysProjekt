@@ -170,7 +170,7 @@ weights=np.zeros(4,dtype=float)     #Initialiseren der Anfangsgewichte
 for i in range(4):                          #Zufälliges Wählen der Anfangsgewichte mit Werten zw. 0 und 1
     weights[i] = random.uniform(0.,1.)
 initweights=np.copy(weights)
-#Trainingschessboards
+# Erstellung der Trainingschessboards
 chessboards,isChessboard=make_training_set(50,25)
 optimal_weights=[]
 

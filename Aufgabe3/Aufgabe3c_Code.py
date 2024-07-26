@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import Functions as func
 import Neurons as N
 
-
+#Funktion zur Simulation des neuronalen Netzes zur Erkennung des Schachbrettmusters mit eingebauter Überpfüfung
 def TestChessboard(Chessboard,weights,korrekt):
 
     Neurons = N.setupNetwork(Chessboard) # Erstellung und Anregung der Input-Neuronen
@@ -21,7 +21,7 @@ def TestChessboard(Chessboard,weights,korrekt):
     TargetNeuron = N.TargetNeuron(I_5)  #Initialisierung Target-Neuron mit endgültiger angelegter Spannung
     print("I_5: ",I_5)
     print("Maximale Aktivierung des Target neurons: ",max(TargetNeuron.get_activation()))  # Ausgabe der Aktivierung (Erkennungswahrscheinlichkeit für Schachbrett) des Target-Neuurons
-
+    #Ausgabe ob NN korrekt funktionierte  mit jeweiliger Fallunterscheidung
     if max(TargetNeuron.get_activation())>=.5:
         if korrekt:
             print("Success!: Schachbrettmuster korrekt erkannt")
