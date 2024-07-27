@@ -15,7 +15,7 @@ plt.plot(N.t,Neurons[2].get_V_Out(),label='Neuron3')
 plt.plot(N.t,Neurons[3].get_V_Out(),label='Neuron4')
 plt.xlabel("t in ms")
 plt.ylabel("V in mV")
-plt.legend()
+
 
 V_Features_Out = [Neurons[0].get_V_max(),Neurons[1].get_V_max(),Neurons[2].get_V_max(),Neurons[3].get_V_max()]#Sämtliche äußere Spannungsmaxima der Input Neuronen
 weights =[1,1,1,1]  #Gewichte der Input Neuronen
@@ -30,8 +30,10 @@ if I_5 < -5:  # Verhinderung, dass I < I0 vorkommt
 
 print("I_5=",I_5)
 TargetNeuron = N.TargetNeuron(I_5)     # Erstellen der Target Neurons mit der Übergabe der zuvor berechneten maximalen gewichteten Anregungsspannung
-print("V_Out_Target Neuron: ",TargetNeuron.get_V_max())
+
 
 plt.plot(N.t,TargetNeuron.get_V_Out(),label='Target')
+plt.legend()
 plt.show()
+
 print("Maximale Aktivierung des Target neurons: ",  max(TargetNeuron.get_activation())) #Ausgabe der Aktivierung (Erkennungswahrscheinlichkeit für Schachbrett) des Target-Neuurons
