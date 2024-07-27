@@ -98,7 +98,7 @@ def train_nn_history(initial_weights, training_boards, targets, learning_rate=0.
     x_achse=np.linspace(1,epochs,epochs)
     weight_history=[]
     error_history=[]
-    for epoch in range(epochDesss):
+    for epoch in range(epochs):
         total_loss = 0
         weight_history.append(np.copy(weights))
         errors=0             #Anzahl gemachter Fehler in dieser Runde
